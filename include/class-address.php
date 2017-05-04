@@ -1,4 +1,5 @@
 <?php
+//HANNANStd
 if (!defined('ABSPATH'))
     exit; // Exit if accessed directly
 
@@ -7,11 +8,15 @@ if (!class_exists('Persian_Woocommerce_Address')) :
     class Persian_Woocommerce_Address extends Persian_Woocommerce_Plugin
     {
 
-        protected $states;
+        public $Country = 'IR';
+        public $states;
+
         private $fields = array();
-        private $Country = 'IR';
         private $selected_city = array();
-        private static $is_run;
+
+        private static $action_priority = 0;
+        private static $iran_cities_page = false;
+        private static $inline_script_printed = false;
 
         public function __construct()
         {
@@ -23,13 +28,15 @@ if (!class_exists('Persian_Woocommerce_Address')) :
             if (PW()->get_options('enable_iran_cities') == 'yes') {
 
                 add_filter('woocommerce_checkout_fields', array($this, 'checkout_fields_cities'));
+                add_filter('woocommerce_billing_fields', array($this, 'billing_fields_cities'));
+                add_filter('woocommerce_shipping_fields', array($this, 'shipping_fields_cities'));
+
                 add_filter('woocommerce_form_field_billing_iran_cities', array($this, 'iran_cities_field'), 11, 4);
                 add_filter('woocommerce_form_field_shipping_iran_cities', array($this, 'iran_cities_field'), 11, 4);
 
-                add_action('woocommerce_after_order_notes', array($this, 'inline_js'));
-                add_action('wp_footer', array($this, 'inline_js'));
                 add_action('wp_enqueue_scripts', array($this, 'external_js'));
-
+                add_action('wp_footer', array($this, 'inline_js'), 0);
+                add_action('wp_footer', array($this, 'force_inline_js'), 999999);
             }
 
             $this->states = array(
@@ -84,7 +91,7 @@ if (!class_exists('Persian_Woocommerce_Address')) :
 
         public function iran_states($states)
         {
-            $states['IR'] = $this->states;
+            $states[$this->Country] = $this->states;
 
             if (PW()->get_options("allowed_states") == "all")
                 return $states;
@@ -92,28 +99,56 @@ if (!class_exists('Persian_Woocommerce_Address')) :
             $selections = PW()->get_options('specific_allowed_states');
 
             if (is_array($selections))
-                $states['IR'] = array_intersect_key($this->states, array_flip($selections));
+                $states[$this->Country] = array_intersect_key($this->states, array_flip($selections));
 
             return $states;
         }
 
-        //Cities
+        //--------------------------------------------
         public function checkout_fields_cities($fields)
         {
             $this->fields = $fields;
 
-            $types = array('billing', 'shipping');
-            foreach ($types as $type) {
-                $city_classes = '';
-                if (!empty($fields[$type][$type . '_city']['class']) && $city_classes = $fields[$type][$type . '_city']['class']) {
-                    $city_classes = is_array($city_classes) ? implode(',', $city_classes) : $city_classes;
-                    $city_classes = str_ireplace('form-row-wide', 'form-row-last', $city_classes);
+            if (is_checkout()) {
+                $types = array('billing', 'shipping');
+                foreach ($types as $type) {
+                    $fields[$type][$type . '_city'] = $this->change_city_filed($fields[$type][$type . '_city'], $type);
                 }
-                $fields[$type][$type . '_city']['type'] = apply_filters($type . '_iran_city_type', $type . '_iran_cities', $fields);
-                $fields[$type][$type . '_city']['class'] = apply_filters($type . '_iran_city_class', explode(',', $city_classes), $fields);
-                $fields[$type][$type . '_city']['options'] = apply_filters($type . '_iran_city_options', array('' => ''), $fields);
             }
 
+            return $fields;
+        }
+
+        public function billing_fields_cities($fields)
+        {
+            if (is_wc_endpoint_url('edit-address')) {
+                $type = 'billing';
+                $fields[$type . '_city'] = $this->change_city_filed($fields[$type . '_city'], $type);
+            }
+
+            return $fields;
+        }
+
+        public function shipping_fields_cities($fields)
+        {
+            if (is_wc_endpoint_url('edit-address')) {
+                $type = 'shipping';
+                $fields[$type . '_city'] = $this->change_city_filed($fields[$type . '_city'], $type);
+            }
+
+            return $fields;
+        }
+
+        public function change_city_filed($fields, $type)
+        {
+            $city_classes = '';
+            if (!empty($fields['class']) && $city_classes = $fields['class']) {
+                $city_classes = is_array($city_classes) ? implode(',', $city_classes) : $city_classes;
+                $city_classes = str_ireplace('form-row-wide', 'form-row-last', $city_classes);
+            }
+            $fields['type'] = apply_filters($type . '_iran_city_type', $type . '_iran_cities', $fields, $type);
+            $fields['class'] = apply_filters($type . '_iran_city_class', explode(',', $city_classes), $fields, $type);
+            $fields['options'] = apply_filters($type . '_iran_city_options', array('' => ''), $fields, $type);
             return $fields;
         }
 
@@ -175,45 +210,64 @@ if (!class_exists('Persian_Woocommerce_Address')) :
 
         public function external_js()
         {
-
             wp_dequeue_script('pw-iran-cities');
             wp_deregister_script('pw-iran-cities');
-            wp_register_script('pw-iran-cities', apply_filters('persian_woo_iran_cities', PW()->plugin_url('include/assets/js/iran_cities.min.js')), array('jquery'), PW_VERSION, true);
+            wp_register_script('pw-iran-cities', apply_filters('persian_woo_iran_cities', PW()->plugin_url('include/assets/js/iran_cities.min.js')), false, PW_VERSION, true);
 
-            if (is_checkout()) {
+            if (self::$iran_cities_page = (is_checkout() || is_wc_endpoint_url('edit-address'))) {
                 wp_enqueue_script('pw-iran-cities');
             }
         }
 
-        public function inline_js()
+        public function inline_js($force_inline_js = false)
         {
-            if (!empty(self::$is_run) || !is_checkout())
-                return true;
+            if (!$force_inline_js) {
 
-            self::$is_run = 'applied';
+                if (self::$inline_script_printed == 'yes' || !self::$iran_cities_page || self::$action_priority > 100)
+                    return;
 
+                if (!(wp_script_is('jquery', 'done') && !wp_script_is('wc-country-select', 'done'))) {
+                    self::$action_priority += 5;
+                    add_action('wp_footer', array($this, 'inline_js'), self::$action_priority);
+                    return;
+                }
+            }
+
+            self::$inline_script_printed = 'yes';
             $value_index = apply_filters('iran_cities_value_index', 0);
-
             $types = array('billing', 'shipping');
             ?>
             <script type="text/javascript">
-                jQuery(document).ready(function ($) {
-                    <?php
-                    foreach ($types as $type) :
+                if (!window.jQuery) {
+                    alert("کتابخانه جیکوئری قبل از کدهای مربوط به شهرهای ایران لود نشده است!");
+                }
+                jQuery(function ($) {
+                    <?php foreach ($types as $type) :
                     $selected_value = $type . '_iran_cities_selected_value';
                     global ${$selected_value};
                     $value = !empty(${$selected_value}) ? ${$selected_value} : '';
                     $placeholder = isset($this->fields[$type][$type . '_city']['placeholder']) ? $this->fields[$type][$type . '_city']['placeholder'] : __('City', 'woocommerce');
+
+                    $countries = 'get_' . str_replace('billing', 'allowed', $type) . '_countries';
+                    $countries = WC()->countries->$countries();
+                    $iran_exist = isset($countries[strtoupper($this->Country)]) || isset($countries[strtolower($this->Country)]) || isset($countries[ucfirst($this->Country)]) ? 'yes' : 'no';
+                    $just_iran = count($countries) == 1 && $iran_exist == 'yes' ? 'yes' : 'no';
                     ?>
+
+                    var <?php echo $type; ?>_iran_exist = '<?php echo $iran_exist; ?>';
+                    var <?php echo $type; ?>_just_iran = '<?php echo $just_iran; ?>';
+
                     $(document.body).on('change', '#<?php echo $type; ?>_state', function () {
 
-                        if ($('#<?php echo $type; ?>_country').val() == '<?php echo $this->Country ?>') {
+                        if (<?php echo $type; ?>_iran_exist == 'yes' && (<?php echo $type; ?>_just_iran || $('#<?php echo $type; ?>_country').val() == '<?php echo $this->Country ?>')) {
+
                             <?php echo $type; ?>_cities = [];
                             <?php echo $type; ?>_cities[0] = new Array('خطا در دریافت شهرها', '0');
+
                             if (typeof Persian_Woo_iranCities === "function")
-                                <?php echo $type; ?>_cities = Persian_Woo_iranCities($('#<?php echo $type; ?>_state').val());
+                                <?php echo $type; ?>_cities = Persian_Woo_iranCities('' + $('#<?php echo $type; ?>_state').val() + '');
                             else {
-                                alert('تابع مربوط به شهرها یافت نمیشود. با مدیریت در میان بگذارید.');
+                                alert('تابع مربوط به شهرهای ایران یافت نمیشود. با مدیریت در میان بگذارید.');
                             }
 
                             <?php echo $type; ?>_cities.sort(function (a, b) {
@@ -224,7 +278,6 @@ if (!class_exists('Persian_Woocommerce_Address')) :
                                 else
                                     return -1;
                             });
-
                             var options = '<option value="-1">انتخاب کنید</option>';
                             var j;
                             <?php echo $type; ?>_selected = '';
@@ -236,43 +289,66 @@ if (!class_exists('Persian_Woocommerce_Address')) :
                                 }
                                 options += "<option value='" + <?php echo $type; ?>_cities[j][<?php echo $value_index; ?>] + "' " + selected + ">" + <?php echo $type; ?>_cities[j][0] + "</option>";
                             }
-
                             $('#<?php echo $type; ?>_city').empty();
-
                             if ($("#<?php echo $type; ?>_city").is('select')) {
                                 $('#<?php echo $type; ?>_city').append(options);
                             }
-
                             $('#<?php echo $type; ?>_city').val(<?php echo $type; ?>_selected).trigger("change");
                         }
                     });
+                    $('#<?php echo $type; ?>_state').trigger('change');
 
                     var <?php echo $type; ?>_city_select = $('#<?php echo $type; ?>_city_field').html();
-                    var <?php echo $type; ?>_city_input = '<input id="<?php echo $type; ?>_city" name="<?php echo $type; ?>_city" type="text" class="input-text" value="" placeholder="<?php echo $placeholder;?>" />';
+                    var <?php echo $type; ?>_city_input = '<input id="<?php echo $type; ?>_city" name="<?php echo $type; ?>_city" type="text" class="input-text" value="<?php echo $value;?>" placeholder="<?php echo $placeholder;?>" />';
 
-                    $('#<?php echo $type; ?>_country').change(function () {
+                    $(document.body).on('change', '#<?php echo $type; ?>_country', function () {
+                        var is_iran = $('#<?php echo $type; ?>_country').val() == '<?php echo $this->Country ?>' ? 'yes' : 'no';
+                        set_iran_cities_field('<?php echo $type; ?>', is_iran);
+                    });
+                    $('#<?php echo $type; ?>_country').trigger('change');
 
-                        if ($('#<?php echo $type; ?>_country').val() == '<?php echo $this->Country ?>') {
-                            if (!$("#<?php echo $type; ?>_city").is('select')) {
-                                $('#<?php echo $type; ?>_city_field').empty();
-                                $('#<?php echo $type; ?>_city_field').html(<?php echo $type; ?>_city_select);
+                    if (!$('#<?php echo $type; ?>_country').length) {
+                        set_iran_cities_field('<?php echo $type; ?>', <?php echo $type; ?>_just_iran);
+                    }
 
-                                $('#<?php echo $type; ?>_state').val('').trigger("change");
-                                $('#<?php echo $type; ?>_city').val('').trigger("change");
+                    $(document.body).on('change', '#<?php echo $type; ?>_city', function () {
+                        if ($('#<?php echo $type; ?>_city').val() == 'لطفا استان خود را انتخاب کنید') {
+                            if ($().select2 && $('#<?php echo $type; ?>_state').data('select2'))
+                                $('#<?php echo $type; ?>_state').select2('open');
+                        }
+                    });
+
+                    <?php if (is_checkout()) wc_enqueue_js("if ($().select2 && $('#" . $type . "_city').data('select2') && !$('#" . $type . "_state').data('select2'))
+                        $('#" . $type . "_state').select2();"); ?>
+
+                    <?php endforeach; ?>
+                    function set_iran_cities_field(type, iran) {
+                        if (iran == 'yes') {
+                            if (!$('#' + type + '_city').is('select')) {
+                                $('#' + type + '_city_field').empty();
+                                $('#' + type + '_city_field').html(eval(type + '_city_select'));
+                                $('#' + type + '_state').val('').trigger("change");
+                                $('#' + type + '_city').val('').trigger("change");
                             }
                         }
                         else {
-                            $('#<?php echo $type; ?>_city_field').find('*').not('label').remove();
-                            $('#<?php echo $type; ?>_city_field').append(<?php echo $type; ?>_city_input);
-
-                            $('#<?php echo $type; ?>_state').val('').trigger("change");
-                            $('#<?php echo $type; ?>_city').val('').trigger("change");
+                            $('#' + type + '_city_field').find('*').not('label').remove();
+                            $('#' + type + '_city_field').append(eval(type + '_city_input'));
+                            $('#' + type + '_state').val('').trigger("change");
+                            $('#' + type + '_city').val('').trigger("change");
                         }
-                    });
-                    <?php endforeach; ?>
+                    }
+
                 });
             </script>
             <?php
+        }
+
+        public function force_inline_js()
+        {
+            if (self::$inline_script_printed != 'yes' && self::$iran_cities_page && wp_script_is('jquery', 'done')) {
+                $this->inline_js(true);
+            }
         }
 
     }

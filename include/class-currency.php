@@ -15,7 +15,6 @@ if (!class_exists('Persian_Woocommerce_Currencies')) :
 
         public function iran_currencies($currencies)
         {
-
             $currencies += array(
                 'IRR' => __('ریال', 'woocommerce'),
                 'IRHR' => __('هزار ریال', 'woocommerce'),
@@ -24,7 +23,6 @@ if (!class_exists('Persian_Woocommerce_Currencies')) :
             );
 
             return $currencies;
-
         }
 
         public function iran_currencies_symbol($currency_symbol, $currency)

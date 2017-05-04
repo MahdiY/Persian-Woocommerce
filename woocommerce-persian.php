@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: ووکامرس پارسی
+Plugin Name: ووکامرس فارسی
 Plugin URI: http://woocommerce.ir
 Description: بسته فارسی ساز ووکامرس پارسی به راحتی سیستم فروشگاه ساز ووکامرس را فارسی می کند. با فعال سازی افزونه ، واحد پولی ریال و تومان ایران و همچنین لیست استان های ایران به افزونه افزوده می شوند. پشتیبانی در <a href="http://www.woocommerce.ir/" target="_blank">ووکامرس پارسی</a>.
-Version: 2.6.14
+Version: 3.0
 Author: ووکامرس فارسی
 Author URI: http://woocommerce.ir
 */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH'))
     exit; // Exit if accessed directly
 
 if (!defined('PW_VERSION'))
-    define('PW_VERSION', '2.6.14');
+    define('PW_VERSION', '3.0');
 
 require_once(dirname(__FILE__) . '/include/persian-woocommerce.php');
 
@@ -28,7 +28,7 @@ require_once(dirname(__FILE__) . '/include/class-tools.php');
 if (PW()->wc_is_active) {
     require_once(dirname(__FILE__) . '/include/class-address.php');
     require_once(dirname(__FILE__) . '/include/class-currency.php');
-    require_once(dirname(__FILE__) . '/include/class-rtl.php');
+    //require_once(dirname(__FILE__) . '/include/class-rtl.php');
     require_once(dirname(__FILE__) . '/include/class-widget.php');
     require_once(dirname(__FILE__) . '/include/class-yahoo-download.php');
 }
