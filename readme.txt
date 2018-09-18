@@ -1,32 +1,24 @@
 ﻿=== Persian Woocommerce ===
-author: Persian Woocommerce
+author: ووکامرس فارسی
 Contributors: Persianscript, hannanstd, mahdiy
 author URI: http://www.woocommerce.ir/
-Donate link: http://woocommerce.ir/donate.html
-plugin URI: http://www.woocommerce.ir/download.html
+plugin URI: http://www.woocommerce.ir/download/
 Tags: persian,parsi,parsian,persians,farsi,iran,woocommerce, persian woocommerce, woocommerce farsi, iran, iranian, rtl, fa_IR,states,iranian rials,iranian tomans, woocommerce.ir,affiliate, cart, checkout, commerce, configurable, digital, download, downloadable, e-commerce, ecommerce, inventory, reports, sales, sell, shipping, shop, shopping, stock, store, tax, variable, widgets, woothemes, wordpress ecommerce
-Requires at least: 4.0
-Tested up to: 4.7.3
+Requires at least: 4.4
+Tested up to: 4.9.6
 
-This plugin extends the WooCommerce shop plugin with complete Persian(Farsi) language packs
+بسته ووکامرس پارسی به راحتی سیستم فروشگاه ساز ووکامرس را فارسی می کند و امکانات جدید متناسب با ایران را به ووکامرس اضافه میکند.
 
 == Description ==
-**Persian Woocommerce**
-This plugin extends the WooCommerce shop plugin with complete Persian(Farsi) language packs
-
-= Features =
-* Translate All part of woocommerce to Persian (farsi)
-* Enables Iran States in Woocommerce Settings and customers Orders!
-* Enables iranian Rials and Tomans Currency 
-* Enables Replace the words
-* and...
+**ووکامرس فارسی**
+بسته فارسی ساز فروشگاه ساز ووکامرس شما را قادر می سازد تا ووکامرس را به صورت کامل فارسی شده همراه با امکانات کاربردی نظیر شهر های ایران، واحد های پولی ایران، درگاه های پرداخت بانکی و ابزارهای کاربردی دیگر داشته باشید.
 
 = Compatibility =
-* Woocommece 3.x
-* Wordpress 4.x
+* Woocommece 3.4.x
+* Wordpress 4.9.x
 
 = Support =
-*  [Persian Support in woocommerce.ir](http://woocommerce.ir/)
+*  [پشتیبان ووکامرس فارسی](http://woocommerce.ir/)
 
 = Fa =
 * بسته فارسی ساز ووکامرس شما را قادر می سازد تا فروشگاه ساز ووکامرس را به فارسی تبدیل کنید.
@@ -52,6 +44,37 @@ This plugin extends the WooCommerce shop plugin with complete Persian(Farsi) lan
 You can read complete documentations on the [woocommerce.ir](http://www.woocommerce.ir)
 
 == Changelog ==
+= 3.4.2 =
+* رفع باگ ریز در کلاس درگاه های پرداخت
+= 3.4.1 =
+* بروزرسانی زبان برای ووکامرس سری 3.4.x
+= 3.4.0 =
+* بروزرسانی زبان برای ووکامرس سری 3.4.x
+= 3.3.6.2 =
+* رفع مشکل درگاه Pay.IR
+= 3.3.6.1 =
+* رفع مشکل منوی تنظیمات افزونه پیامک
+= 3.3.6 =
+* رفع باگ و بازنویسی توابع قدیمی - کلاس بندی کدها
+* بهبود بخش شهرهای ایران (به ووکامرس پارسی >> ابزارها مراجعه شود)
+* اضافه شدن هسته اصلی درگاه های ایرانی برای بهبود و افزایش امنیت پرداخت
+* پس از بروز رسانی یک بار دیگر درگاه Pay.ir را تنظیم نمایید.
+= 3.3.0 =
+* پشتیبانی از ووکامرس 3.3 و سازگاری با PHP 7.2
+= 3.2.6.1 =
+* some bug fixed
+= 3.2.6 =
+* 3.2.6 افزوده شدن درگاه بانکی Pay.ir
+= 3.2.0 =
+* بروزرسانی ترجمه و سازگاری با ووکامرس 3.2.0
+= 3.1.2 =
+* رفع چند باگ و بهبود ترجمه
+= 3.1.1 =
+* سازگاری با ووکامرس 3.1.1
+= 3.1 =
+* سازگاری با ووکامرس 3.1 و بروزرسانی ترجمه
+= 3.0.8 =
+* بهبود ترجمه و افزوده شدن تقویم شمسی به صورت آزمایشی
 = 3.0 =
 * بهبود ترجمه و سازگاری با ووکامرس 3.0
 = 2.6.15 =
@@ -114,66 +137,7 @@ You can read complete documentations on the [woocommerce.ir](http://www.woocomme
 * نسخه اولیه
 
 == Upgrade Notice ==
-= 3.0 =
-* بهبود ترجمه و سازگاری با ووکامرس 3.0
-= 2.6.15 =
-* بهبود بخش شهرهای ایران
-= 2.6.14 =
-* بازنویسی مجدد کدهای مربوط به شهرهای ایران
-= 2.6.11 =
-* بهبود حلقه های ترجمه
-* افزودن قابلیت جستجو در حلقه های ترجمه
-* فارسی کردن تمامی قیمت های ووکامرس
-= 2.6.3 =
-* رفع باگ
-= 2.6.2 =
-* رفع مشکل عدم دانلود محصولات با ایمیل یاهو
-= 2.6.1 =
-* رفع نقص
-= 2.6 =
-* بروزرسانی فارسی ساز و رفع باگ
-= 2.5.4 =
-* رفع باگ کوچک
-= 2.5.3 =
-* فارسی سازی اعداد قیمت محصولات متغیر
-* فارسی سازی اعداد سبد خرید
-* هماهنگی با نسخه جدید ووکامرس
-= 2.5.2 =
-* رفع باگ
-= 2.5.1 =
-* بهبود نسخه 2.5
-= 2.5 =
-* بروزرسانی فایل زبان و افزودن ابزار های تازه
-= 2.4.3 =
-* بروز رسانی فایل زبان و رفع باگ
-= 2.4.2 =
-* بروز رسانی فایل زبان و رفع باگ
-= 2.4.1 =
-* رفع باگ
-= 2.4.0 =
-* بهینه سازی کامل و باز نویسی و سازگاری با آخرین نسخه
-= 2.3.9.2 =
-* رفع باگ
-= 2.3.9.1 =
-* افزوده شدن امکان انتخاب شهر توسط کاربر
-= 2.3.9 =
-* افزوده شدن امکان انتخاب شهر توسط کاربر
-= 2.3.8 =
-* فارسی سازی عبارات جدید برای ووکامرس 2.3.8
-= 2.3.7 =
-* فارسی سازی عبارات جدید برای ووکامرس 2.3.7
-= 2.2.10 =
-* بروزرسانی تازه برای نسخه 2.2.10
-= 1.4 =
-* سازگاری با ووکامرس 2.2
-= 1.3 =
-* سازگاری با ووکامرس 2.1.2
-= 1.2 =
-* سازگاری با ووکارس 2.1
-= 1.1 =
-* رفع باگ
-= 1.0 =
-* نسخه اولیه
-
+= 3.4.2 =
+* رفع باگ ریز در کلاس درگاه های پرداخت
 == Traducciones ==
-You can read complete documentations on the [woocommerce.ir](http://www.woocommerce.ir)
+پشتیبانی در سایت [Woocommerce.ir](http://www.woocommerce.ir) انجام میشود.
